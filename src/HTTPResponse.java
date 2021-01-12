@@ -9,13 +9,14 @@ public class HTTPResponse {
     String response = null;
     String source = "Users\\alierkan\\IdeaProjects\\HTTPServer\\htmlfiles";
 
+
     public HTTPResponse(HTTPRequest request) {
 
         this.request = request;
         String CRLF = " \r\n";
         //File file = new File(source + request.filename);
         File file = new File("abm523.html");
-        System.out.println(source+request.filename);
+     //   System.out.println(source+request.filename);
 
         try {
 

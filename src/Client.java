@@ -30,11 +30,11 @@ public class Client extends Thread {
             System.out.print(request_frame);
             System.out.println("----End of Request Frame----");
 
-            HTTPRequest request = new HTTPRequest(request_frame);
+          //  HTTPRequest request = new HTTPRequest(request_frame);
 
-            HTTPResponse response = new HTTPResponse(request);
+           // HTTPResponse response = new HTTPResponse(request);
 
-            print_writer.write(response.response.toCharArray());
+         //   print_writer.write(response.response.toCharArray());
 
             print_writer.close();
             buffered_reader.close();
