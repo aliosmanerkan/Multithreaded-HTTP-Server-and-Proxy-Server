@@ -2,6 +2,11 @@ package main.utils;
 
 import main.types.StatusCodes;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class MessageUtils {
 
     public static StatusCodes getResponseStatusCode(String method, String query) {
@@ -30,5 +35,13 @@ public class MessageUtils {
         return 0;
     }
 
-
+    public static HashMap<String, String> getKeyValuePair(HashMap<String, String> values, String header) {
+        Pattern twopart = Pattern.compile("(.*):(.*)");
+        Matcher m = twopart.matcher(header);
+        if (m.matches()) {
+            if (values == null) values = new HashMap<>();
+            values.put(m.group(1).toLowerCase(), m.group(2));
+        }
+        return values;
+    }
 }

@@ -1,9 +1,12 @@
 package main.protocol;
 
+import main.utils.MessageUtils;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.StringTokenizer;
 
 public class HttpRequest {
@@ -12,9 +15,11 @@ public class HttpRequest {
     private String method;
     private String httpQueryString;
     private String requestString;
+    private HashMap<String, String> headerPairs;
 
     public HttpRequest(Socket socket) {
         this.socket = socket;
+        headerPairs = new HashMap<>();
 
         try {
             init();
@@ -40,6 +45,7 @@ public class HttpRequest {
         while (bufferedReader.ready()) {
             System.out.println(requestString);
             requestString = bufferedReader.readLine();
+            headerPairs = MessageUtils.getKeyValuePair(headerPairs, requestString);
         }
     }
 
@@ -55,4 +61,12 @@ public class HttpRequest {
         return requestString;
     }
 
+    public String getHeaderValue(String key) {
+        for (HashMap.Entry<String, String> entry : headerPairs.entrySet()) {
+            if (entry.getKey().equals(key.toLowerCase())) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
 }
