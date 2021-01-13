@@ -6,9 +6,9 @@ public class HtmlResponseGenerator {
         String body;
         long filesize;
 
-       body = "<html>\n " +
+        body = "<html>\n " +
                 "<head> \n" +
-                "<title>\n" + "this file " + count + " length " + "</title> " +
+                "<title>\n" + "I am " + count + " bytes long " + "</title> " +
                 "</head>\n " +
                 "<body>\n";
 
