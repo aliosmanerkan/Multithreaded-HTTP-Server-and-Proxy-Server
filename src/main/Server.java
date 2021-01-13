@@ -7,11 +7,11 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class Server {
-    public Server(RequestInterpreter interpreter) throws IOException {
+    public Server(int port, RequestInterpreter interpreter) throws IOException {
         ServerSocket Server = null;
-        Server = new ServerSocket(5000, 10, InetAddress.getByName("127.0.0.1"));
+        Server = new ServerSocket(port, 10, InetAddress.getByName("127.0.0.1"));
 
-        System.out.println("TCPServer Waiting for client on port 5000");
+        System.out.println("TCPServer Waiting for client on port " + port);
 
         while (true) {
             Socket connected = Server.accept();
