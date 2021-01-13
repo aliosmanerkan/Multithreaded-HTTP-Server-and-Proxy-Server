@@ -62,7 +62,7 @@ public class HTTPResponse {
         DataOutputStream outputStream = new DataOutputStream(this.client.getOutputStream());
 
         // Set status code
-        outputStream.writeBytes(this.status);
+        outputStream.writeBytes(String.format("%s\r\n", this.status));
 
         // Set headers
         for (Map.Entry<String, String> header : this.headers.entrySet()) {
