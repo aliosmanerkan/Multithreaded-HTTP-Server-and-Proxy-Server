@@ -1,6 +1,7 @@
 package main;
 
 import main.types.StatusCodes;
+import main.utils.HtmlResponseGenerator;
 
 public class Main extends Thread {
     public static void main(String args[]) throws Exception {
@@ -12,7 +13,9 @@ public class Main extends Thread {
             String httpQueryString = request.getHttpQueryString();
 
             return response
-                    .setBody("Test" + "</br>Method: " + method + "</br>Request String:" + requestString + "</br>Http Request String" + httpQueryString)
+                    .setContentType("text/html")
+                    .addHeader("cache-control", "max-age:5000")
+                    .setBody(HtmlResponseGenerator.generateByByteCount(500))
                     .setStatusCode(StatusCodes.OK);
         });
 
