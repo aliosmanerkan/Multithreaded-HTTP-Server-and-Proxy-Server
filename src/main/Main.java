@@ -20,7 +20,7 @@ public class Main extends Thread {
 
                     return response
                             .setContentType("text/html")
-                            .addHeader("cache-control", "max-age:5000")
+                            .addHeader("Cache-Control", "max-age:5000")
                             .setBody(HtmlResponseGenerator.generateByByteCount(500))
                             .setStatusCode(StatusCodes.OK);
                 });
