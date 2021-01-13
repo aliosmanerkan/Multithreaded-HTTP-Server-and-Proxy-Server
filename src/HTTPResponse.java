@@ -5,41 +5,57 @@ import java.util.StringTokenizer;
 
 public class HTTPResponse {
 
+    BufferedReader inFromClient = null;
+    DataOutputStream out = null;
+    File returnHtml;
     private Socket socket;
     public HTTPResponse(Socket socket) {
         this.socket = socket;
     }
 
-    public void createHTML(int byteNumber) {
+    public void setBody(int byteNumber) throws IOException {
         int i = 0;
+        String body;
         long filesize;
-        File returnHtml = new File("byteNumber.toString().txt");
-        try {
-            FileWriter fileWriter = new FileWriter("byteNumber.toString().txt");
-            fileWriter.write("<!DOCTYPE html>\n " +
+
+            body = "<!DOCTYPE html>\n " +
                     "<html>\n " +
                     "<head> \n" +
-                    "<title>\n" + "this file" + byteNumber + "length " + "</title> " +
+                    "<title>\n" + "this file " + byteNumber + " length " + "</title> " +
                     "</head>\n " +
                     "<body>\n" +
-                    "<p>\n");
+                    "<p>\n";
 
-            filesize = returnHtml.length();
             while (i < (byteNumber - 113)) {
-                fileWriter.write("a");
+                body = body + "a";
                 i++;
             }
-            fileWriter.write("\t</p>\n" +
+            body += "\t</p>\n" +
                     "\t\n" +
                     "\t</body>\n" +
-                    "</html>");
-            fileWriter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+                    "</html>";
 
-        filesize = returnHtml.length();
-        System.out.println(filesize);
+        out.writeBytes(body);
+    }
+
+    public void addheader(int byteNumber,String responseString) throws Exception{
+        out = null;
+        String serverdetails = "Multithread HTTPServer";
+        String contentLengthLine = null;
+        String contentTypeLine = "Content-Type: text/html" + "\r\n";
+        contentLengthLine = "Content-Length: " + byteNumber + "\r\n";
+
+        out.writeBytes(serverdetails);
+        out.writeBytes(contentTypeLine);
+        out.writeBytes(contentLengthLine);
+        out.writeBytes("Connection: close\r\n");
+        out.writeBytes("\r\n");
+
+        out.close();
+    }
+
+    public void setStatusCode(int Code){
 
     }
+
 }
