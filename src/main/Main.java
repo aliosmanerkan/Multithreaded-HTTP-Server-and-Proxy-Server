@@ -18,11 +18,21 @@ public class Main extends Thread {
                     String requestString = request.getRequestString();
                     String httpQueryString = request.getHttpQueryString();
 
-                    return response
-                            .setContentType("text/html")
-                            .addHeader("Cache-Control", "max-age:5000")
-                            .setBody(HtmlResponseGenerator.generateByByteCount(500))
-                            .setStatusCode(StatusCodes.OK);
+                    System.out.println("HTTP_QUERY_STRING: " + httpQueryString);
+
+                    try {
+                        String path = httpQueryString.replace("/", "");
+                        int number = Integer.parseInt(path);
+                        return response
+                                .setContentType("text/html")
+                                .addHeader("Cache-Control", "max-age:5000")
+                                .setBody(HtmlResponseGenerator.generateByByteCount(number))
+                                .setStatusCode(StatusCodes.OK);
+                    } catch (Exception e) {
+                        return response
+                                .setBody("Wrong request")
+                                .setStatusCode(StatusCodes.BAD_REQUEST);
+                    }
                 });
             } catch (IOException e) {
                 e.printStackTrace();
