@@ -2,95 +2,84 @@ package main.protocol;
 
 import main.types.StatusCodes;
 
-import java.io.*;
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.net.*;
-import java.util.StringTokenizer;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class HTTPResponse {
+    private final Socket client;
+    private final HashMap<String, String> headers = new HashMap<>();
+    private String body = "";
+    private String status = "";
 
-    BufferedReader inFromClient = null;
-    DataOutputStream out = null;
-    File returnHtml;
-    private Socket socket;
-    public HTTPResponse(Socket socket) {
-        this.socket = socket;
+    public HTTPResponse(Socket client) {
+        this.client = client;
     }
 
-    public void setBody(int byteNumber) throws IOException {
-        int i = 0;
-        String body;
-        long filesize;
-
-        body = "<!DOCTYPE html>\n " +
-                "<html>\n " +
-                "<head> \n" +
-                "<title>\n" + "this file " + byteNumber + " length " + "</title> " +
-                "</head>\n " +
-                "<body>\n" +
-                "<p>\n";
-
-        while (i < (byteNumber - 113)) {
-            body = body + "a";
-            i++;
-        }
-        body += "\t</p>\n" +
-                "\t\n" +
-                "\t</body>\n" +
-                "</html>";
-
-        out.writeBytes(body);
+    public HTTPResponse setBody(String body) {
+        this.body = body;
+        this.addHeader("content-length", String.valueOf(this.body.length()));
+        return this;
     }
 
-    public void addheader(int byteNumber,String responseString) throws Exception{
-        out = null;
-        String serverdetails = "Multithread HTTPServer";
-        String contentLengthLine = null;
-        String contentTypeLine = "Content-Type: text/html" + "\r\n";
-        contentLengthLine = "Content-Length: " + byteNumber + "\r\n";
-
-        out.writeBytes(serverdetails);
-        out.writeBytes(contentTypeLine);
-        out.writeBytes(contentLengthLine);
-        out.writeBytes("Connection: close\r\n");
-        out.writeBytes("\r\n");
-
-        out.close();
+    public HTTPResponse addHeader(String key, String value) {
+        this.headers.put(key, value);
+        return this;
     }
 
-    public void setStatusCode(StatusCodes code) throws IOException {
-        String statusLine;
-        switch(code){
+    public HTTPResponse setContentType(String type) {
+        this.addHeader("content-type", type);
+        return this;
+    }
+
+    public HTTPResponse setStatusCode(StatusCodes code) throws Exception {
+        switch (code) {
             case OK:
-                statusLine = "HTTP/1.1 200 OK";
+                this.status = "HTTP/1.1 200 OK";
                 break;
             case NOT_FOUND:
-                statusLine = "HTTP/1.1 404 NOT FOUND";
+                this.status = "HTTP/1.1 404 NOT FOUND";
                 break;
             case BAD_REQUEST:
-                statusLine = "HTTP/1.1 400 BAD REQUEST";
+                this.status = "HTTP/1.1 400 BAD REQUEST";
                 break;
             case NOT_IMPLEMENTED:
-                statusLine = "HTTP/1.1 501 NOT IMPLEMENTED";
+                this.status = "HTTP/1.1 501 NOT IMPLEMENTED";
                 break;
             case REQUEST_URI_TOO_LONG:
-                statusLine = "HTTP/1.1 414 REQUEST URI TOO LONG";
+                this.status = "HTTP/1.1 414 REQUEST URI TOO LONG";
                 break;
             default:
-                statusLine = "HTTP/1.1 404 NOT FOUND";
-                break;
-
+                throw new Exception(String.format("Unkown status code \"%s\"", code.toString()));
         }
-
-        out.writeBytes(statusLine);
+        return this;
     }
 
-    public void send(){
+    public HTTPResponse end() throws IOException {
+        DataOutputStream outputStream = new DataOutputStream(this.client.getOutputStream());
 
+        // Set status code
+        outputStream.writeBytes(this.status);
+
+        // Set headers
+        for (Map.Entry<String, String> header : this.headers.entrySet()) {
+            outputStream.writeBytes(String.format("%s: %s\r\n", header.getKey().toLowerCase(), header.getValue()));
+        }
+
+        // Set trailing headers
+        outputStream.writeBytes("Connection: close\r\n");
+        outputStream.writeBytes("\r\n");
+
+        // Set body
+        outputStream.writeBytes(this.body);
+
+        outputStream.close();
+        this.client.close();
+
+        return this;
     }
 
 }
