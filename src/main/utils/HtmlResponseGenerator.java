@@ -6,18 +6,19 @@ public class HtmlResponseGenerator {
         String body;
         long filesize;
 
-        body = "<html>\n " +
-                "<head> \n" +
-                "<title>\n" + "I am " + count + " bytes long " + "</title> " +
-                "</head>\n " +
-                "<body>\n";
+        body = "<html>" +
+                "<head>" +
+                "<title>" + "I am" + count + "bytes long" + "</title>" +
+                "</head>" +
+                "<body>";
 
-        while (i < (count - 113)) {
+
+        i=body.length();
+        while (i < count-14) {
             body = body + "a";
             i++;
         }
-        body += "\t\n" +
-                "\t</body>\n" +
+        body += "</body>" +
                 "</html>";
 
         return body;
