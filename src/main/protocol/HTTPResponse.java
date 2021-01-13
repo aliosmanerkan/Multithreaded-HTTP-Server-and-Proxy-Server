@@ -21,7 +21,7 @@ public class HTTPResponse {
 
     public HTTPResponse setBody(String body) {
         this.body = body;
-        this.addHeader("content-length", String.valueOf(this.body.length()));
+        this.addHeader("Content-Length", String.valueOf(this.body.length()));
         return this;
     }
 
@@ -31,7 +31,7 @@ public class HTTPResponse {
     }
 
     public HTTPResponse setContentType(String type) {
-        this.addHeader("content-type", type);
+        this.addHeader("Content-Type", type);
         return this;
     }
 
@@ -62,11 +62,11 @@ public class HTTPResponse {
         DataOutputStream outputStream = new DataOutputStream(this.client.getOutputStream());
 
         // Set status code
-        outputStream.writeBytes(this.status);
+        outputStream.writeBytes(String.format("%s\r\n", this.status));
 
         // Set headers
         for (Map.Entry<String, String> header : this.headers.entrySet()) {
-            outputStream.writeBytes(String.format("%s: %s\r\n", header.getKey().toLowerCase(), header.getValue()));
+            outputStream.writeBytes(String.format("%s: %s\r\n", header.getKey(), header.getValue()));
         }
 
         // Set trailing headers

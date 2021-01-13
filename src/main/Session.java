@@ -16,7 +16,6 @@ public class Session extends Thread {
     }
 
     public void run() {
-
         try {
             System.out.println("The Client " + socket.getInetAddress() + ":" + socket.getPort() + " is connected");
             HttpRequest request = new HttpRequest(socket);
