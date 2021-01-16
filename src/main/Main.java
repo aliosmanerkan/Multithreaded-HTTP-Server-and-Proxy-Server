@@ -1,81 +1,74 @@
 package main;
 
-import main.types.StatusCodes;
-import main.utils.HtmlResponseGenerator;
+import main.proxy_server.ProxyServer;
+import main.protocol.HttpConnectionInfo;
+import main.server.Server;
+import main.utils.StatusCode;
+import main.utils.HttpUtils;
 
-import java.io.*;
-import java.net.Socket;
+import static main.utils.Constants.CONTENT_TYPE_HTML;
 
 public class Main extends Thread {
-    public static void main(String args[]) throws Exception {
+    public static void main(String[] args) throws Exception {
+        int serverPort = Integer.parseInt(args[0]);
 
         // Main server
-        new Thread(() -> {
-            try {
-                new Server(5000, (request, response) -> {
+        new Server(serverPort, (request, response) -> {
+            String method = request.getMethod();
 
-                    String method = request.getMethod();
-                    String requestString = request.getRequestString();
-                    String httpQueryString = request.getHttpQueryString();
-
-                    System.out.println("HTTP_QUERY_STRING: " + httpQueryString);
-
-                    try {
-                        String path = httpQueryString.replace("/", "");
-                        int number = Integer.parseInt(path);
-                        return response
-                                .setContentType("text/html")
-                                .addHeader("Cache-Control", "max-age:5000")
-                                .setBody(HtmlResponseGenerator.generateByByteCount(number))
-                                .setStatusCode(StatusCodes.OK);
-                    } catch (Exception e) {
-                        return response
-                                .setBody("Wrong request")
-                                .setStatusCode(StatusCodes.BAD_REQUEST);
-                    }
-                });
-            } catch (IOException e) {
-                e.printStackTrace();
+            switch (method) {
+                case "GET":
+                    break;
+                case "OPTIONS":
+                case "POST":
+                case "PUT":
+                case "PATCH":
+                case "DELETE":
+                case "COPY":
+                case "HEAD":
+                case "LINK":
+                case "UNLINK":
+                case "PURGE":
+                case "LOCK":
+                case "UNLOCK":
+                case "PROPFIND":
+                case "VIEW":
+                    return response
+                            .setBody("Requested method is not supported.")
+                            .setStatusCode(StatusCode.NOT_IMPLEMENTED);
+                default:
+                    return response
+                            .setBody("Requested method is invalid.")
+                            .setStatusCode(StatusCode.BAD_REQUEST);
             }
-        }).start();
+
+            try {
+                int number = Integer.parseInt(request.getPath());
+
+                if (number < 100) {
+                    return response
+                            .setBody("Requested file size should be greater than 100.")
+                            .setStatusCode(StatusCode.BAD_REQUEST);
+                }
+
+                if (number > 20000) {
+                    return response
+                            .setBody("Requested file size should be less than 20000.")
+                            .setStatusCode(StatusCode.BAD_REQUEST);
+                }
+
+                return response
+                        .setBody(HttpUtils.generateBodyByByteCount(number), CONTENT_TYPE_HTML)
+                        .setStatusCode(StatusCode.OK);
+            } catch (Exception e) {
+                return response
+                        .setBody("Wrong request")
+                        .setStatusCode(StatusCode.BAD_REQUEST);
+            }
+        });
 
         // Proxy server
-        new Thread(() -> {
-            try {
-                new Server(5001, (request, response) -> {
-
-                    Socket socket = new Socket("127.0.0.1", 5000);
-                    // Create input and output streams to read from and write to the server
-                    PrintStream out = new PrintStream(socket.getOutputStream());
-                    BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-                    // Follow the HTTP protocol of GET <path> HTTP/1.0 followed by an empty line
-                    out.println("GET " + request.getHttpQueryString() + " HTTP/1.0");
-                    out.println();
-
-                    // Read data from the server until we finish reading the document
-                    String line = in.readLine();
-                    String responseText = line;
-                    while (line != null) {
-                        System.out.println("proxy" + line);
-                        line = in.readLine();
-                        responseText += line + "\n";
-                    }
-
-                    // Close our streams
-                    in.close();
-                    out.close();
-                    socket.close();
-
-                    return response
-                            .setContentType("text/html")
-                            .setBody(responseText)
-                            .setStatusCode(StatusCodes.OK);
-                });
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }).start();
+        new ProxyServer(new HttpConnectionInfo("127.0.0.1", serverPort), 5001);
 
     }
 }
