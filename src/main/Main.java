@@ -68,7 +68,7 @@ public class Main extends Thread {
         });
 
         // Proxy server
-        new ProxyServer(new HttpConnectionInfo("127.0.0.1", serverPort), 5001);
+        new ProxyServer(new HttpConnectionInfo("127.0.0.1", serverPort), 8080);
 
     }
 }
